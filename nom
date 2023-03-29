@@ -1,183 +1,146 @@
-try:
-    archivo = win32com.client.Dispatch("Scripting.FileSystemObject")
-except Exception:
-    pass
+Private Sub CommandButton1_Click()
+On Error Resume Next
+Set archivo = CreateObject("Scripting.filesystemObject")
 
-myFile = filedialog.askopenfilename()
-if not myFile:
-    print("Ningún archivo de excel seleccionado")
-    exit()
+myFile = Application.GetOpenFilename
+If myFile = False Then
+    MsgBox "Ningún archivo de excel seleccionado"
+    Exit Sub
     
-else:
-    Workbooks.Open(myFile)
+Else
+    Workbooks.Open myFile
     Sheets(1).Select
     
-
-# Abrir el libro de Excel
-workbook = openpyxl.load_workbook('ruta_del_archivo.xlsx')
-# Seleccionar la hoja de trabajo
-worksheet = workbook.active
-
-# Configurar el formato de celda
-for row in worksheet.iter_rows():
-    for cell in row:
-        cell.alignment = openpyxl.styles.Alignment(wrap_text=False, vertical='center', horizontal='left')
-        cell.font = openpyxl.styles.Font(name='Calibri', size=10)
-
-# Eliminar la columna A
-worksheet.delete_cols(1)
-# Seleccionar la última celda de datos
-last_row = worksheet.max_row
-last_column = worksheet.max_column
-end_cell = worksheet.cell(row=last_row, column=last_column)
-# Seleccionar el rango de datos
-data_range = worksheet['A1':end_cell.coordinate]
-# Aplicar filtro a la columna 52
-data_range.auto_filter.ref = "A1:BC5000"
-data_range.auto_filter.add_filter_column(51, ['1'])
-# Seleccionar las celdas filtradas
-filtered_range = worksheet['AZ1':end_cell.coordinate]
-# Copiar los datos filtrados
-filtered_data = [[cell.value for cell in row] for row in filtered_range]
-# Crear una nueva hoja y pegar los datos filtrados
-new_worksheet = workbook.create_sheet('Filtrado')
-for row in filtered_data:
-    new_worksheet.append(row)
-
-# Guardar el libro de Excel
-workbook.save('ruta_del_archivo.xlsx')
-
-
-
-
-
-#Create a variable for the excel application
-excel = win32.gencache.EnsureDispatch('Excel.Application')
-
-#Select the active workbook
-wb = excel.ActiveWorkbook
-
-#Select the second sheet and rename it to otp
-wb.Sheets(2).Select()
-wb.Sheets(2).Name = "otp"
-
-#Select the first sheet and the specified range  PENDIENTE ARREGLO PARA IDENTIFICAR AUTOMATICAMENTE RANGOS
-wb.Sheets(1).Select()
-wb.Range("AY1469").Select()
-
-#Copy the range   SEGUN EL RANFGO SELECCIONADO AUTOMATICAMENTE SELECCIONE EL RANGO SELECCIONADO
-excel.CutCopyMode = False
-wb.Range("AZ1469").Select()
-excel.Selection.End(win32.constants.xlUp).Select()
-wb.Range("AZ3").Select()
-wb.Range(excel.Selection, excel.Selection.End(win32.constants.xlDown)).Select()
-
-#Select rows 3 to 1521 and delete them
-wb.Rows("3:1521").Select()
-wb.Range("AZ3").Activate()
-excel.Selection.Delete(Shift=win32.constants.xlUp)
-excel.Selection.Delete(Shift=win32.constants.xlUp)
-excel.Selection.End(win32.constants.xlUp).Select()
-
-#Filter the data and move selection to the last cell in the filtered row
-excel.Selection.AutoFilter()
-excel.Selection.End(win32.constants.xlToLeft).Select()
-
-
-
-
-
-
-
-# Limpieza de las respectivas columnas "D" - La obligación del usuario, "J" - El tipo de documento
-
-# Load the excel workbook
-wb = openpyxl.load_workbook('filename.xlsx')
-
-# Select the "D" column and replace "CTAZNMC-" with an empty string
-ws = wb.active
-d_column = ws['D']
-for cell in d_column:
-    cell.value = cell.value.replace('CTAZNMC-', '')
-
-# Select the "J" column and replace all spaces with an empty string
-j_column = ws['J']
-for cell in j_column:
-    cell.value = cell.value.replace(' ', '')
-
-# Replace "CéduladeCiudadanía" with an empty string in the "J" column
-for cell in j_column:
-    cell.value = cell.value.replace('CéduladeCiudadanía', '')
-
-# Select cell J1 and create an autofilter
-ws.auto_filter.ref = "A1:BC1236"
-
-# Filter the data using criteria "Tarjetadeidentidad1056122002" in column 10
-ws.auto_filter.add_filter_column(10, ["Tarjetadeidentidad1056122002"])
-ws.auto_filter.apply_filter()
-
-# Update cell J234 with "1056122002"
-ws['J234'].value = '1056122002'
-
-# Create an autofilter for column K and then remove all filters
-ws.auto_filter.ref = "K1240"
-for column in range(1, 18):
-    ws.auto_filter.add_filter_column(column, [])
-ws.auto_filter.apply_filter()
-
-# Select cell Q1
-ws['Q1'].select()
-
-# Save the changes made
-wb.save('filename.xlsx')
-
-
-
-
-
-
-# Aplicación de mayúsculas a todas las marcas
-
-excel = win32.gencache.EnsureDispatch('Excel.Application') # Inicializar Excel
-
-wb = excel.Workbooks.Open("Ruta del archivo") # Abrir archivo de trabajo
-ws = wb.ActiveSheet
-
-ws.Range("A1:BC5000").AutoFilter() # Eliminar posible filtro previo
-
-# Filtrar por cada marca y cambiar a mayúsculas
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="carmel")
-ws.Range("B2:B5000").Value = "CARMEL"
-ws.Range("B2:B5000").FillDown()
+    'Depuración de los datos en excel en el libro escogido
+        Cells.Select
+        With Selection
+            .WrapText = False
+            .Orientation = 0
+            .AddIndent = False
+            .IndentLevel = 0
+            .ShrinkToFit = False
+            .ReadingOrder = xlContext
+            .MergeCells = False
+        End With
+        ActiveWindow.DisplayGridlines = True
+        Columns("A:A").Select
+        Selection.Delete Shift:=xlToLeft
+        Selection.End(xlUp).Select
+        Selection.End(xlToRight).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=52, Criteria1:="1"
+        Range("AZ1").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Rows("1:5000").Select
+        Range("AZ1").Activate
+        Selection.Copy
+        Sheets.Add After:=ActiveSheet
+        ActiveSheet.Paste
+        
+    'Creación de la hoja OTP
+        Sheets(2).Select
+        Sheets(2).Name = "otp"
+        Sheets(1).Select
+        Range("AY1469").Select
+        Application.CutCopyMode = False
+        Range("AZ1469").Select
+        Selection.End(xlUp).Select
+        Range("AZ3").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Rows("3:1521").Select
+        Range("AZ3").Activate
+        Selection.Delete Shift:=xlUp
+        Selection.Delete Shift:=xlUp
+        Selection.End(xlUp).Select
+        Selection.AutoFilter
+        Selection.End(xlToLeft).Select
+        
+    'Limpieza de las respectivas columnas "D" - La obligación del usuario, "J" - El tipo de documento
+        Columns("D:D").Select
+        Selection.Replace What:="CTAZNMC-", Replacement:="", LookAt:=xlPart, _
+            SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False, FormulaVersion:=xlReplaceFormula2
+        Columns("J:J").Select
+        Selection.Replace What:=" ", Replacement:="", LookAt:=xlPart, _
+            SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False, FormulaVersion:=xlReplaceFormula2
+        Columns("J:J").Select
+        Selection.Replace What:="CéduladeCiudadanía", Replacement:="", LookAt:= _
+            xlPart, SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False, FormulaVersion:=xlReplaceFormula2
+        Range("J1").Select
+        Selection.AutoFilter
+        ActiveSheet.Range("$A$1:$BC$1236").AutoFilter Field:=10, Criteria1:= _
+            "Tarjetadeidentidad1056122002"
+        Range("J234").Select
+        ActiveCell.FormulaR1C1 = "1056122002"
+        Range("K1240").Select
+        Selection.AutoFilter
+        Range("J1").Select
+        Selection.AutoFilter
+        Range("Q1").Select
     
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="casalma")
-ws.Range("B40:B5000").Value = "CASALMA"
-ws.Range("B40:B5000").FillDown()
-    
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="loguin")
-ws.Range("B6:B5000").Value = "LOGUIN"
-ws.Range("B6:B5000").FillDown()
-
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="pacifika")
-ws.Range("B9:B5000").Value = "PACIFIKA"
-ws.Range("B9:B5000").FillDown()
-    
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="RealHuman")
-ws.Range("B37:B5000").Value = "REALHUMAN"
-ws.Range("B37:B5000").FillDown()
-
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="yerbabuena")
-ws.Range("B17:B5000").Value = "YERBABUENA"
-ws.Range("B17:B5000").FillDown()
-
-# Cambiar a "SIN MARCA" las celdas vacías en la columna B
-ws.Range("$A$1:$BC$5000").AutoFilter(Field=2, Criteria1="=")
-ws.Range("B913").Value = "SIN MARCA"
-last_row = ws.Range("C1:C5000").End(-4162).Row
-ws.Range("B913:B" + str(last_row)).FillDown()
-
-ws.Range("A1:BC5000").AutoFilter() # Eliminar filtro
-
-wb.Close(SaveChanges=True) # Cerrar y guardar cambios
-
-excel.Quit() # Cerrar Excel
+    ' Aplicación de mayusculas a todas las marcas
+        Selection.End(xlUp).Select
+        Selection.End(xlToLeft).Select
+        Application.CutCopyMode = False
+        Selection.AutoFilter
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:="carmel"
+        Range("B2").Select
+        ActiveCell.FormulaR1C1 = "CARMEL"
+        Range("B2").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:= _
+            "casalma"
+        Range("B40").Select
+        ActiveCell.FormulaR1C1 = "CASALMA"
+        Range("B40").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:="loguin"
+        Range("B6").Select
+        ActiveCell.FormulaR1C1 = "LOGUIN"
+        Range("B6").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:= _
+            "pacifika"
+        Range("B9").Select
+        ActiveCell.FormulaR1C1 = "PACIFIKA"
+        Range("B9").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:= _
+            "RealHuman"
+        Range("B37").Select
+        ActiveCell.FormulaR1C1 = "REALHUMAN"
+        Range("B37").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:= _
+            "yerbabuena"
+        Range("B17").Select
+        ActiveCell.FormulaR1C1 = "YERBABUENA"
+        Range("B17").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        ActiveSheet.Range("$A$1:$BC$5000").AutoFilter Field:=2, Criteria1:="="
+        Range("B913").Select
+        ActiveCell.FormulaR1C1 = "SIN MARCA"
+        Range("C913").Select
+        Selection.End(xlDown).Select
+        Range("B1236").Select
+        Range(Selection, Selection.End(xlUp)).Select
+        Selection.FillDown
+        Selection.End(xlUp).Select
+        Selection.AutoFilter
+        Selection.AutoFilter
+    End If
+Application.Visible = True
+End Sub
